@@ -1,26 +1,30 @@
 import select
 import socket
 import sys
-import _thread as thread
 from lib import click
+
+try:
+    import thread
+except ImportError:
+    import _thread as thread
 
 def on_new_client(clientsocket,client_address):
     try:
-        click.echo(f"Connection from {client_address[0]} established")
+        click.echo("Connection from {} established".format(client_address[0]))
         clientsocket.send('Send "quit" to close the connection\nClient: '.encode())
         while True:
             data = clientsocket.recv(1024)
             if data.decode().lower().rstrip() == 'quit':
-                click.echo(f'Request to close connection received from {client_address[0]}, closing now')
+                click.echo('Request to close connection received from {}, closing now'.format(client_address[0]))
                 response="Received quit signal, goodbye!\n"
                 clientsocket.send(response.encode())
                 break
             elif data:
-                click.echo(f"{client_address[0]}: {data.decode().rstrip()}")
+                click.echo("{}: {}".format(client_address[0], data.decode().rstrip() ))
                 response="Server: {}\nClient: ".format(data.decode().rstrip())
                 clientsocket.send(response.encode())
             else:
-                click.echo(f"No data from {client_address[0]}, closing connection")
+                click.echo("No data from {}, closing connection".format(client_address[0]))
                 break   
 
     finally:
